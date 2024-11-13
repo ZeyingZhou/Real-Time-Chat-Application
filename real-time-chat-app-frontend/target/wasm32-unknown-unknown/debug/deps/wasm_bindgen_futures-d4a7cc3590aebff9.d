@@ -1,0 +1,9 @@
+/Users/zeyingzhou/rust/project/Real-Time-Chat-Application/real-time-chat-app-frontend/target/wasm32-unknown-unknown/debug/deps/libwasm_bindgen_futures-d4a7cc3590aebff9.rmeta: /Users/zeyingzhou/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.37/src/lib.rs /Users/zeyingzhou/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.37/src/queue.rs /Users/zeyingzhou/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.37/src/task/singlethread.rs
+
+/Users/zeyingzhou/rust/project/Real-Time-Chat-Application/real-time-chat-app-frontend/target/wasm32-unknown-unknown/debug/deps/libwasm_bindgen_futures-d4a7cc3590aebff9.rlib: /Users/zeyingzhou/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.37/src/lib.rs /Users/zeyingzhou/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.37/src/queue.rs /Users/zeyingzhou/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.37/src/task/singlethread.rs
+
+/Users/zeyingzhou/rust/project/Real-Time-Chat-Application/real-time-chat-app-frontend/target/wasm32-unknown-unknown/debug/deps/wasm_bindgen_futures-d4a7cc3590aebff9.d: /Users/zeyingzhou/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.37/src/lib.rs /Users/zeyingzhou/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.37/src/queue.rs /Users/zeyingzhou/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.37/src/task/singlethread.rs
+
+/Users/zeyingzhou/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.37/src/lib.rs:
+/Users/zeyingzhou/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.37/src/queue.rs:
+/Users/zeyingzhou/.cargo/registry/src/index.crates.io-6f17d22bba15001f/wasm-bindgen-futures-0.4.37/src/task/singlethread.rs:

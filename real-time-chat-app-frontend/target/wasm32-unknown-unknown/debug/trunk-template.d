@@ -1,0 +1,1 @@
+/Users/zeyingzhou/rust/project/Real-Time-Chat-Application/real-time-chat-app-frontend/target/wasm32-unknown-unknown/debug/trunk-template.wasm: /Users/zeyingzhou/rust/project/Real-Time-Chat-Application/real-time-chat-app-frontend/src/app.rs /Users/zeyingzhou/rust/project/Real-Time-Chat-Application/real-time-chat-app-frontend/src/main.rs
