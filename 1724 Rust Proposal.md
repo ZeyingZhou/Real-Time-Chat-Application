@@ -1,8 +1,3 @@
----
-title: 1724 Rust Proposal
-
----
-
 # Real-Time Chat Application Proposal
 Name: Zeying Zhou Student#: 1005172732
 Name: Danyang Zhang Student#: 1005087022
