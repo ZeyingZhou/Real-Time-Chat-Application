@@ -1,10 +1,14 @@
 use yew::prelude::*;
+use yew_router::prelude::*;
+use yewdux::prelude::use_store;
+
+use crate::router::{switch, Route};
 
 #[function_component(App)]
 pub fn app() -> Html {
     html! {
-        <main>
-            <p class="bg-red-100">{"Test!"}</p>
-        </main>
+        <BrowserRouter>
+            <Switch<Route> render={switch}/>
+        </BrowserRouter>
     }
 }
