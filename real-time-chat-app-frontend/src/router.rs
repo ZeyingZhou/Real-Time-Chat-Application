@@ -2,7 +2,7 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 
 use crate::pages::{
-    signInPage::SignInPage,signUpPage::SignUpPage,homePage::HomePage
+    sign_in_page::SignInPage,sign_up_page::SignUpPage,home_page::HomePage
 };
 
 #[derive(Clone, Routable, PartialEq)]
