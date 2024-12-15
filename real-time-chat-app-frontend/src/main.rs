@@ -1,7 +1,9 @@
+mod api;
 mod app;
+mod components;
 mod pages;
 mod router;
-mod components;
+mod store;
 use app::App;
 
 fn main() {
