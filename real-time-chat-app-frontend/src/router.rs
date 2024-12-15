@@ -2,7 +2,7 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 
 use crate::pages::{
-    sign_in_page::SignInPage,sign_up_page::SignUpPage,home_page::HomePage
+    sign_in_page::SignInPage,sign_up_page::SignUpPage,home_page::HomePage,profile_page::ProfilePage,user_home_page::UserHomePage
 };
 
 #[derive(Clone, Routable, PartialEq)]
@@ -13,6 +13,10 @@ pub enum Route {
     SignInPage,
     #[at("/signup")]
     SignUpPage,
+    #[at("/profile")]
+    ProfilePage,
+    #[at("/user")]
+    UserHomePage
 }
 
 pub fn switch(routes: Route) -> Html {
@@ -20,5 +24,7 @@ pub fn switch(routes: Route) -> Html {
         Route::HomePage => html! {<HomePage/> },
         Route::SignInPage => html! {<SignInPage/> },
         Route::SignUpPage => html! {<SignUpPage/> },
+        Route::ProfilePage => html! {<ProfilePage/> },
+        Route::UserHomePage => html! {<UserHomePage/>}
     }
 }

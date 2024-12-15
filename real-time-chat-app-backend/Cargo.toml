@@ -4,4 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-actix-web = "4"
+actix-web = "4"                  # Web framework
+env_logger = "0.11"              # Logging utility
+futures-util = { version = "0.3.17", default-features = false, features = ["std"] } # Futures for async-like utilities
+log = "0.4"                      # Log crate for debugging
+r2d2 = "0.8"                     # Connection pooling library
+r2d2_sqlite = "0.25"             # R2D2 adapter for SQLite
+rusqlite = "0.32.1"                # SQLite driver
+serde = { version = "1", features = ["derive"] } # Data serialization
