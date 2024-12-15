@@ -10,5 +10,8 @@ futures-util = { version = "0.3.17", default-features = false, features = ["std"
 log = "0.4"                      # Log crate for debugging
 r2d2 = "0.8"                     # Connection pooling library
 r2d2_sqlite = "0.25"             # R2D2 adapter for SQLite
-rusqlite = "0.32.1"                # SQLite driver
+rusqlite = { version = "0.32.1", features = ["bundled"] }               # SQLite driver
 serde = { version = "1", features = ["derive"] } # Data serialization
+actix = "0.13"               # Actix actor framework
+actix-rt = "2.8"             # Runtime for Actix
+chrono = "0.4"               # For time handling
