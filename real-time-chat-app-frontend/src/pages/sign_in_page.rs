@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
-use crate::api::user_api::api_login_user;
+use crate::api::user_api::api_signin_user;
 use crate::components::{form_input::FormInput, loading_button::LoadingButton};
 use crate::router::{self, Route};
 use crate::store::{set_page_loading, set_show_alert, Store};
@@ -17,7 +17,7 @@ use yewdux::prelude::*;
 
 #[derive(Validate, Debug, Default, Clone, Serialize, Deserialize)]
 
-struct LoginUserSchema {
+struct SignInUserSchema {
     #[validate(
         length(min = 1, message = "User Name is required"),
     )]
@@ -30,7 +30,7 @@ struct LoginUserSchema {
 
 fn get_input_callback(
     name: &'static str,
-    cloned_form: UseStateHandle<LoginUserSchema>,
+    cloned_form: UseStateHandle<SignInUserSchema>,
 ) -> Callback<String> {
     Callback::from(move |value| {
         let mut data = cloned_form.deref().clone();
@@ -46,7 +46,7 @@ fn get_input_callback(
 #[function_component(SignInPage)]
 pub fn sign_in_page() -> Html {
     let (store, dispatch) = use_store::<Store>();
-    let form = use_state(|| LoginUserSchema::default());
+    let form = use_state(|| SignInUserSchema::default());
     let validation_errors = use_state(|| Rc::new(RefCell::new(ValidationErrors::new())));
     let navigator = use_navigator().unwrap();
 
@@ -124,13 +124,22 @@ pub fn sign_in_page() -> Html {
 
                         username_input.set_value("");
                         password_input.set_value("");
-
+    
                         let form_json = serde_json::to_string(&form_data).unwrap();
-                        let res = api_login_user(&form_json).await;
+                        let res = api_signin_user(&form_json).await;
                         match res {
-                            Ok(_) => {
+                            Ok(signin_response) => {
+                                // Store the user ID in localStorage
+                                web_sys::window()
+                                    .unwrap()
+                                    .local_storage()
+                                    .unwrap()
+                                    .unwrap()
+                                    .set_item("user_id", &signin_response.user_id.to_string())
+                                    .expect("Failed to store user ID in localStorage");
+    
                                 set_page_loading(false, dispatch);
-                                navigator.push(&router::Route::ProfilePage);
+                                navigator.push(&router::Route::UserHomePage);
                             }
                             Err(e) => {
                                 set_page_loading(false, dispatch.clone());
@@ -153,7 +162,7 @@ pub fn sign_in_page() -> Html {
           {"Welcome Back"}
         </h1>
         <h2 class="text-lg text-center mb-4 text-ct-dark-200">
-          {"Login to have access"}
+          {"Sign in to have access"}
         </h2>
           <form
             onsubmit={on_submit}
@@ -171,7 +180,7 @@ pub fn sign_in_page() -> Html {
               loading={store.page_loading}
               text_color={"text-ct-blue-600"}
             >
-              {"Login"}
+              {"Signin"}
             </LoadingButton>
             <span class="block">
               {"Need an account?"} {" "}

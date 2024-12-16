@@ -1,5 +1,5 @@
 use crate::{
-    api::user_api::api_logout_user,
+    api::user_api::api_signout_user,
     router::{self, Route},
     store::{set_auth_user, set_page_loading, set_show_alert, Store},
 };
@@ -14,7 +14,7 @@ pub fn header_component() -> Html {
     let user = store.auth_user.clone();
     let navigator = use_navigator().unwrap();
 
-    let handle_logout = {
+    let handle_signout = {
         let store_dispatch = dispatch.clone();
         let cloned_navigator = navigator.clone();
 
@@ -23,7 +23,7 @@ pub fn header_component() -> Html {
             let navigator = cloned_navigator.clone();
             spawn_local(async move {
                 set_page_loading(true, dispatch.clone());
-                let res = api_logout_user().await;
+                let res = api_signout_user().await;
                 match res {
                     Ok(_) => {
                         set_page_loading(false, dispatch.clone());
@@ -49,16 +49,13 @@ pub fn header_component() -> Html {
           <ul class="flex items-center gap-4">
             if user.is_some() {
                <>
-                <li>
-                  <Link<Route> to={Route::ProfilePage} classes="text-ct-dark-600">{"Profile"}</Link<Route>>
-                </li>
                 <li
                   class="cursor-pointer"
                 >
                   {"Create Post"}
                 </li>
-                <li class="cursor-pointer" onclick={handle_logout}>
-                  {"Logout"}
+                <li class="cursor-pointer" onclick={handle_signout}>
+                  {"SignOut"}
                 </li>
               </>
 

@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
-use crate::api::user_api::api_register_user;
+use crate::api::user_api::api_signup_user;
 use crate::components::{form_input::FormInput, loading_button::LoadingButton};
 use crate::router::{self, Route};
 use crate::store::{set_page_loading, set_show_alert, Store};
@@ -17,7 +17,7 @@ use yewdux::prelude::*;
 
 #[derive(Validate, Debug, Default, Clone, Serialize, Deserialize)]
 
-struct RegisterUserSchema {
+struct SignUpUserSchema {
     #[validate(
         length(min = 1, message = "User name is required"),
     )]
@@ -33,9 +33,11 @@ struct RegisterUserSchema {
     password_confirm: String,
 }
 
+
+
 fn get_input_callback(
     name: &'static str,
-    cloned_form: UseStateHandle<RegisterUserSchema>,
+    cloned_form: UseStateHandle<SignUpUserSchema>,
 ) -> Callback<String> {
     Callback::from(move |value| {
         let mut data = cloned_form.deref().clone();
@@ -50,9 +52,9 @@ fn get_input_callback(
 }
 
 #[function_component(SignUpPage)]
-pub fn register_page() -> Html {
+pub fn sign_up_page() -> Html {
     let (store, dispatch) = use_store::<Store>();
-    let form = use_state(|| RegisterUserSchema::default());
+    let form = use_state(|| SignUpUserSchema::default());
     let validation_errors = use_state(|| Rc::new(RefCell::new(ValidationErrors::new())));
     let navigator = use_navigator().unwrap();
 
@@ -141,12 +143,12 @@ pub fn register_page() -> Html {
                         password_input.set_value("");
                         password_confirm_input.set_value("");
 
-                        let res = api_register_user(&form_json).await;
+                        let res = api_signup_user(&form_json).await;
                         match res {
                             Ok(_) => {
                                 set_page_loading(false, dispatch.clone());
                                 set_show_alert(
-                                    "Account registered successfully".to_string(),
+                                    "Account sign up successfully".to_string(),
                                     dispatch,
                                 );
                                 navigator.push(&router::Route::SignInPage);
