@@ -1,0 +1,9 @@
+D:\wrc_UT\ece\ECE1724Rust\project\Real-Time-Chat-Application-main\real-time-chat-app-backend\target\debug\deps\libicu_normalizer-bffc93f91d6caf99.rmeta: C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\lib.rs C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\error.rs C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\properties.rs C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\provider.rs C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\uts46.rs
+
+D:\wrc_UT\ece\ECE1724Rust\project\Real-Time-Chat-Application-main\real-time-chat-app-backend\target\debug\deps\icu_normalizer-bffc93f91d6caf99.d: C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\lib.rs C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\error.rs C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\properties.rs C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\provider.rs C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\uts46.rs
+
+C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\lib.rs:
+C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\error.rs:
+C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\properties.rs:
+C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\provider.rs:
+C:\Users\18756\.cargo\registry\src\index.crates.io-6f17d22bba15001f\icu_normalizer-1.5.0\src\uts46.rs:
