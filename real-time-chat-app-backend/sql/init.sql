@@ -1,5 +1,7 @@
 -- Users Table
 CREATE TABLE IF NOT EXISTS users (
+-- Users Table
+CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
@@ -32,14 +34,6 @@ CREATE TABLE IF NOT EXISTS messages (
     user_id INTEGER,
     content TEXT NOT NULL,
     timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (room_id) REFERENCES chat_rooms(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
-
--- Insert an Admin User (Optional)
-INSERT OR IGNORE INTO users (username, password_hash, status, last_seen, createdAt, updatedAt)
-VALUES ('admin', 'hashed_password_here', 'online', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- Insert a Default Chat Room (Optional)
-INSERT OR IGNORE INTO chat_rooms (name)
-VALUES ('General Chat Room');
