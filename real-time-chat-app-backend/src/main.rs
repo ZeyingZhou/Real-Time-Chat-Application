@@ -2,7 +2,7 @@ mod presence;
 mod websocket;
 use websocket::chat_route;
 use websocket::ChatServer;
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{web, App, HttpRequest,HttpResponse, HttpServer, Responder};
 use actix::prelude::*;
 use bcrypt::{hash, verify};
 use chrono::{Utc, DateTime};
@@ -14,6 +14,8 @@ use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::{params};
 use actix_cors::Cors;
 use serde::{Deserialize, Serialize};
+use crate::presence::PresenceActor;
+
 
 // Define shared app state
 struct AppState {
@@ -338,6 +340,8 @@ async fn main() -> std::io::Result<()> {
     let manager = SqliteConnectionManager::file("chatapp.db");
     let pool = Pool::new(manager).expect("Failed to create DB pool");
     let server = ChatServer::new().start();
+    let chat_server = ChatServer::new().start();
+    let presence_actor: Addr<PresenceActor> = PresenceActor::new(pool.clone(), chat_server.clone()).start();
     // Start the Actix Web server
     info!("Starting server on http://127.0.0.1:8000");
     HttpServer::new(move || {
@@ -351,13 +355,20 @@ async fn main() -> std::io::Result<()> {
             )
             .app_data(web::Data::new(AppState { db_pool: pool.clone() }))
             .app_data(web::Data::new(server.clone()))
+            .app_data(web::Data::new(presence_actor.clone()))
             .route("/api/auth/signup", web::post().to(signup_user))
             .route("/api/auth/signin", web::post().to(signin_user))
             .route("/api/users/{id}", web::get().to(get_user_info))
             .route("/api/chat_rooms", web::post().to(create_chat_room))
             .route("/api/chat_rooms/join", web::post().to(join_chat_room))
             .route("/api/chat_rooms/{id}", web::delete().to(delete_chat_room))
-            .route("/ws/{room_id}/{user_id}", web::get().to(chat_route))
+            .route("/ws/{room_id}/{user_id}", web::get().to(
+                move |req: HttpRequest, stream: web::Payload, path: web::Path<(i32, i32)>,
+                      srv: web::Data<Addr<ChatServer>>, presence: web::Data<Addr<PresenceActor>>| {
+                    chat_route(req, stream, path, srv, presence)
+                }
+            ))
+            
             
            
     })

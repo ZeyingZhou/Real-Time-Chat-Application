@@ -3,6 +3,8 @@ use actix_web::{web, Error, HttpRequest, HttpResponse};
 use actix_web_actors::ws;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use crate::presence::{PresenceActor, UserLogin, UserLogout, UserActivity};
+use actix::Addr;
 
 
 // 消息定义
@@ -12,6 +14,7 @@ pub struct ClientMessage {
     pub room_id: i32,
     pub message: String,
     pub user_id: i32,
+
 }
 
 #[derive(Message)]
@@ -74,11 +77,12 @@ pub struct ChatSession {
     user_id: i32,
     room_id: i32,
     server: Addr<ChatServer>,
+    presence: Addr<PresenceActor>,
 }
 
 impl ChatSession {
-    pub fn new(user_id: i32, room_id: i32, server: Addr<ChatServer>) -> Self {
-        Self { user_id, room_id, server }
+    pub fn new(user_id: i32, room_id: i32, server: Addr<ChatServer>, presence: Addr<PresenceActor>) -> Self {
+        Self { user_id, room_id, server, presence }
     }
 }
 
@@ -87,6 +91,8 @@ impl Actor for ChatSession {
 
     fn started(&mut self, ctx: &mut Self::Context) {
         let addr = ctx.address().recipient();
+
+        self.presence.do_send(UserLogin { user_id: self.user_id });
 
         self.server.do_send(JoinRoom {
             room_id: self.room_id,
@@ -101,17 +107,27 @@ impl Actor for ChatSession {
 
         println!("User {} connected to room {}", self.user_id, self.room_id);
     }
+
+    fn stopping(&mut self, _: &mut Self::Context) -> actix::prelude::Running {
+        // 通知 PresenceActor 用户登出
+        self.presence.do_send(UserLogout { user_id: self.user_id });
+        actix::prelude::Running::Stop
+    }
+    
 }
 
 
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for ChatSession {
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
         if let Ok(ws::Message::Text(text)) = msg {
+            self.presence.do_send(UserActivity { user_id: self.user_id });
+
             self.server.do_send(ClientMessage {
                 room_id: self.room_id,
                 message: text.to_string(),
                 user_id: self.user_id,
             });
+
            //tx.text(format!("You: {}", text));
         }
     }
@@ -122,9 +138,19 @@ pub async fn chat_route(
     stream: web::Payload,
     path: web::Path<(i32, i32)>,
     srv: web::Data<Addr<ChatServer>>,
+    presence: web::Data<Addr<PresenceActor>>,
 ) -> Result<HttpResponse, Error> {
     let (room_id, user_id) = path.into_inner();
-    ws::start(ChatSession::new(user_id, room_id, srv.get_ref().clone()), &req, stream)
+    ws::start(
+        ChatSession::new(
+            user_id, 
+            room_id, 
+            srv.get_ref().clone(), 
+            presence.get_ref().clone(), 
+        ), 
+        &req, 
+        stream,
+    )
 }
 
 impl Handler<ClientMessage> for ChatSession {

@@ -2,6 +2,10 @@ use actix::{Actor, AsyncContext, Context, Handler, Message};
 use chrono::Utc;
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
+use crate::websocket::ChatServer;
+use actix::prelude::*;
+use crate::websocket::ClientMessage;
+
 
 // Message for periodic presence checks
 struct CheckPresence;
@@ -41,13 +45,18 @@ impl Message for UserLogout {
 // PresenceActor manages user presence
 pub struct PresenceActor {
     pool: Pool<SqliteConnectionManager>,
+    chat_server: Addr<ChatServer>,
 }
 
 impl PresenceActor {
-    pub fn new(pool: Pool<SqliteConnectionManager>) -> Self {
-        PresenceActor { pool }
+    pub fn new(
+        pool: Pool<SqliteConnectionManager>, 
+        chat_server: Addr<ChatServer>
+    ) -> Self {
+        PresenceActor { pool, chat_server }
     }
 }
+
 
 impl Actor for PresenceActor {
     type Context = Context<Self>;
@@ -95,6 +104,24 @@ impl Handler<UserLogin> for PresenceActor {
         ) {
             eprintln!("Error updating user login time: {:?}", err);
         }
+        let mut stmt = conn
+            .prepare("SELECT room_id FROM user_chat_room_membership WHERE user_id = ?")
+            .unwrap();
+
+        let room_ids: Vec<i32> = stmt
+            .query_map([msg.user_id], |row| row.get(0))
+            .unwrap()
+            .filter_map(Result::ok)
+            .collect();
+
+        for room_id in room_ids {
+            self.chat_server.do_send(ClientMessage {
+                room_id,
+                message: format!("User {} is now online", msg.user_id),
+                user_id: msg.user_id,
+            });
+        }
+
     }
 }
 
@@ -113,6 +140,24 @@ impl Handler<UserActivity> for PresenceActor {
         ) {
             eprintln!("Error updating user activity time: {:?}", err);
         }
+        let mut stmt = conn
+            .prepare("SELECT room_id FROM user_chat_room_membership WHERE user_id = ?")
+            .unwrap();
+
+        let room_ids: Vec<i32> = stmt
+            .query_map([msg.user_id], |row| row.get(0))
+            .unwrap()
+            .filter_map(Result::ok)
+            .collect();
+
+        for room_id in room_ids {
+            self.chat_server.do_send(ClientMessage {
+                room_id,
+                message: format!("User {} is now active", msg.user_id),
+                user_id: msg.user_id,
+            });
+        }
+        
     }
 }
 
@@ -130,5 +175,23 @@ impl Handler<UserLogout> for PresenceActor {
         ) {
             eprintln!("Error updating user logout time: {:?}", err);
         }
+
+        let mut stmt = conn
+        .prepare("SELECT room_id FROM user_chat_room_membership WHERE user_id = ?")
+        .unwrap();
+
+    let room_ids: Vec<i32> = stmt
+        .query_map([msg.user_id], |row| row.get(0))
+        .unwrap()
+        .filter_map(Result::ok)
+        .collect();
+
+    for room_id in room_ids {
+        self.chat_server.do_send(ClientMessage {
+            room_id,
+            message: format!("User {} is now offline", msg.user_id),
+            user_id: msg.user_id,
+        });
+    }
     }
 }
