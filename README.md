@@ -8,7 +8,11 @@ Name: Renchao Wu Student#: 1009750672 renchao.wu@mail.utoronto.ca
 ## Video Demo
 
 
-https://github.com/user-attachments/assets/c256feaa-fe74-4233-9d37-7cfaecd0186b
+
+https://github.com/user-attachments/assets/9d105144-d3af-4e3a-93ac-de27ce6e6b1e
+
+
+
 
 https://drive.google.com/file/d/1Dd7T906H6el6dXlXYdhkLgT_Wuikpida/view?usp=sharing
 
