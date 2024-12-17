@@ -1,9 +1,10 @@
-use yew::prelude::*;
-use wasm_bindgen_futures::spawn_local;
-use yew_router::prelude::*;
-use crate::api::user_api::{fetch_user_info, create_chat_room,join_chat_room};
-use crate::api::types::{UserWithRooms, ChatRoom, CreateRoomRequest};
+use crate::api::types::{ChatRoom, CreateRoomRequest, UserWithRooms};
+use crate::api::user_api::{api_signout_user, create_chat_room, fetch_user_info, join_chat_room};
 use crate::router::Route;
+use wasm_bindgen_futures::spawn_local;
+use web_sys::window;
+use yew::prelude::*;
+use yew_router::prelude::*;
 
 #[function_component(UserHomePage)]
 pub fn user_home_page() -> Html {
@@ -11,12 +12,15 @@ pub fn user_home_page() -> Html {
     let access_code = use_state(|| String::new());
     let user_info = use_state(|| None::<UserWithRooms>);
     let navigator = use_navigator().unwrap();
-    
+
     // Retrieve `user_id` from local storage
     let user_id = {
         let window = web_sys::window().unwrap();
         let storage = window.local_storage().unwrap().unwrap();
-        storage.get_item("user_id").unwrap().and_then(|id| id.parse::<i32>().ok())
+        storage
+            .get_item("user_id")
+            .unwrap()
+            .and_then(|id| id.parse::<i32>().ok())
     };
 
     // Fetch user info when component mounts
@@ -29,8 +33,10 @@ pub fn user_home_page() -> Html {
                         Ok(data) => {
                             web_sys::console::log_1(&"Successfully fetched user info".into());
                             user_info.set(Some(data));
-                        },
-                        Err(err) => web_sys::console::log_1(&format!("Failed to fetch user info: {}", err).into()),
+                        }
+                        Err(err) => web_sys::console::log_1(
+                            &format!("Failed to fetch user info: {}", err).into(),
+                        ),
                     }
                 });
             } else {
@@ -39,7 +45,6 @@ pub fn user_home_page() -> Html {
             || ()
         });
     }
-
 
     // Update the input value for new room name
     let on_new_room_input = {
@@ -69,9 +74,12 @@ pub fn user_home_page() -> Html {
         let user_id = {
             let window = web_sys::window().unwrap();
             let storage = window.local_storage().unwrap().unwrap();
-            storage.get_item("user_id").unwrap().and_then(|id| id.parse::<i32>().ok())
+            storage
+                .get_item("user_id")
+                .unwrap()
+                .and_then(|id| id.parse::<i32>().ok())
         };
-    
+
         Callback::from(move |_| {
             if !new_room_name.is_empty() {
                 if let Some(user_id) = user_id {
@@ -83,7 +91,9 @@ pub fn user_home_page() -> Html {
                                 // Navigate to the chat room page with the room ID
                                 // navigator.push(&Route::ChatRoom { room_id: new_room.id， user_id });
                             }
-                            Err(err) => web_sys::console::log_1(&format!("Failed to create chat room: {}", err).into()),
+                            Err(err) => web_sys::console::log_1(
+                                &format!("Failed to create chat room: {}", err).into(),
+                            ),
                         }
                     });
                     new_room_name.set(String::new()); // Clear the input after adding
@@ -93,7 +103,7 @@ pub fn user_home_page() -> Html {
             }
         })
     };
-    
+
     // Placeholder for joining a room (not yet implemented)
     let join_room = {
         let access_code = access_code.clone();
@@ -102,7 +112,10 @@ pub fn user_home_page() -> Html {
         let user_id = {
             let window = web_sys::window().unwrap();
             let storage = window.local_storage().unwrap().unwrap();
-            storage.get_item("user_id").unwrap().and_then(|id| id.parse::<i32>().ok())
+            storage
+                .get_item("user_id")
+                .unwrap()
+                .and_then(|id| id.parse::<i32>().ok())
         };
 
         Callback::from(move |_| {
@@ -117,7 +130,9 @@ pub fn user_home_page() -> Html {
                                     // navigator.push(&Route::ChatRoom { room_id, user_id });
                                 }
                                 Err(err) => {
-                                    web_sys::console::log_1(&format!("Failed to join the room: {}", err).into());
+                                    web_sys::console::log_1(
+                                        &format!("Failed to join the room: {}", err).into(),
+                                    );
                                 }
                             }
                         });
@@ -127,6 +142,40 @@ pub fn user_home_page() -> Html {
                 } else {
                     web_sys::console::log_1(&"Invalid room ID".into());
                 }
+            }
+        })
+    };
+
+    let sign_out = {
+        let navigator = navigator.clone();
+
+        Callback::from(move |_| {
+            // Retrieve the user ID from local storage
+            let user_id = {
+                let window = web_sys::window().unwrap();
+                let storage = window.local_storage().unwrap().unwrap();
+                storage
+                    .get_item("user_id")
+                    .unwrap()
+                    .and_then(|id| id.parse::<i32>().ok())
+            };
+
+            if let Some(user_id) = user_id {
+                let navigator = navigator.clone(); // Clone navigator inside the closure
+                spawn_local(async move {
+                    match api_signout_user(user_id).await {
+                        Ok(_) => {
+                            // Redirect to the Home Page
+                            navigator.push(&Route::HomePage);
+                            web_sys::console::log_1(&"Successfully signed out".into());
+                        }
+                        Err(err) => {
+                            web_sys::console::log_1(&format!("Sign out failed: {}", err).into());
+                        }
+                    }
+                });
+            } else {
+                web_sys::console::log_1(&"User ID not found in local storage".into());
             }
         })
     };
@@ -165,6 +214,11 @@ pub fn user_home_page() -> Html {
                                 />
                                 <button onclick={join_room.clone()} class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
                                     {"Join Room"}
+                                </button>
+                            </div>
+                            <div class="flex justify-end mb-4">
+                                <button onclick={sign_out.clone()} class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                                    {"Sign Out"}
                                 </button>
                             </div>
                         </>

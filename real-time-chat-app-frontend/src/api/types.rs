@@ -43,7 +43,7 @@ pub struct ChatRoom {
 #[derive(Debug, Serialize, Deserialize, Default, PartialEq, Clone)]
 pub struct JoinRoomRequest {
     pub user_id: i32,
-    pub room_id: i32
+    pub room_id: i32,
 }
 /// Message Model
 #[derive(Debug, Serialize, Deserialize, Default, PartialEq, Clone)]
