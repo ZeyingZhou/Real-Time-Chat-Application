@@ -113,6 +113,81 @@ cargo run
 ```
 
 
+### Testing
+
+To start a new app, we can clear the chatapp.db.
+
+1. user sign up
+```
+curl -X POST http://127.0.0.1:8000/api/auth/signup -H "Content-Type: application/json" -d '{"username": "user1", "password": "password123"}'
+curl -X POST http://127.0.0.1:8000/api/auth/signup -H "Content-Type: application/json" -d '{"username": "user2", "password": "password123"}'
+output:
+{"status":"success","data":{"user":{"id":1,"username":"user1","status":"offline","last_seen":"2024-12-17T02:38:36.249991900+00:00"}}}
+{"status":"success","data":{"user":{"id":2,"username":"user2","status":"offline","last_seen":"2024-12-17T02:38:36.249991900+00:00"}}}
+```
+
+2. user sign in
+```
+curl -X POST http://127.0.0.1:8000/api/auth/signin -H "Content-Type: application/json" -d '{"username": "user1", "password": "password123"}'
+curl -X POST http://127.0.0.1:8000/api/auth/signin -H "Content-Type: application/json" -d '{"username": "user2", "password": "password123"}'
+output:
+{"user_id":1}
+{"user_id":2}
+```
+
+3. create chatroom
+```
+curl -X POST http://127.0.0.1:8000/api/chat_rooms -H "Content-Type: application/json" -d '{"name": "TestRoom1", "user_id": 1}'
+output:
+{"id":1,"name":"TestRoom1"}
+Note: If a user create a chatroom, then he doesn't need to join again because he is already inside it.
+```
+
+4. join chatroom
+```
+curl -X POST http://127.0.0.1:8000/api/chat_rooms/join -H "Content-Type: application/json" -d '{"user_id": 2, "room_id": 1}'
+output:
+Joined chat room successfully
+Note:
+if a user already joined the chatroom, output will be "Failed to join chat room"
+```
+
+5. enter chatroom
+```
+wscat -c ws://127.0.0.1:8000/ws/{room_id}/{user_id}
+wscat -c ws://127.0.0.1:8000/ws/1/1
+wscat -c ws://127.0.0.1:8000/ws/1/2
+output:
+Connected (press CTRL+C to quit)
+< User 1: User 1 joined room 1 and is online
+< User 2: User 2 joined room 1 and is online
+```
+
+6. check status
+```
+curl -X GET http://127.0.0.1:8000/api/users/1
+curl -X GET http://127.0.0.1:8000/api/users/2
+output:
+{"user":{"id":1,"username":"user1","status":"online","last_seen":"2024-12-17T02:44:12.036961200+00:00"},"chat_rooms":[{"id":1,"name":"TestRoom1"}]}
+{"user":{"id":2,"username":"user2","status":"online","last_seen":"2024-12-17T02:44:12.036961200+00:00"},"chat_rooms":[{"id":1,"name":"TestRoom1"}]}
+Note: if a user is inside a chatroom, he is online
+```
+
+7. leave chatroom
+```
+ctrl + C
+```
+
+8. check status
+```
+curl -X GET http://127.0.0.1:8000/api/users/1
+curl -X GET http://127.0.0.1:8000/api/users/2
+{"user":{"id":1,"username":"user1","status":"offline","last_seen":"2024-12-17T02:46:18.026539700+00:00"},"chat_rooms":[{"id":1,"name":"TestRoom1"}]}
+{"user":{"id":2,"username":"user2","status":"offline","last_seen":"2024-12-17T02:46:18.026539700+00:00"},"chat_rooms":[{"id":1,"name":"TestRoom1"}]}
+Note: when a user left chatroom, he will be offline
+```
+
+
 ## Contributions by Each Team Member  
 
 | Team Member     | Contributions                                                                                   |
