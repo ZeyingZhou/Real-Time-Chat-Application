@@ -9,12 +9,8 @@ Name: Renchao Wu Student#: 1009750672 renchao.wu@mail.utoronto.ca
 
 
 
-https://github.com/user-attachments/assets/9d105144-d3af-4e3a-93ac-de27ce6e6b1e
+https://github.com/user-attachments/assets/995e3079-d695-455f-ad5d-65a47f522ad8
 
-
-
-
-https://drive.google.com/file/d/1Dd7T906H6el6dXlXYdhkLgT_Wuikpida/view?usp=sharing
 
 
 ## Motivation
