@@ -191,12 +191,12 @@ Just simply start the backend by cargo run!
 cargo run
 ```
 
-
+After that go to ```http://localhost.:8080/``` access the application
 ## Contributions by Each Team Member  
 
 | Team Member     | Contributions                                                                                   |
 |-----------------|-------------------------------------------------------------------------------------------------|
-| **Zeying Zhou** | Frontend development sign in, sign up, user home page and relate api; Backend development sign in, sign up, create and join room api; Database set up; Documentation for the project  
+| **Zeying Zhou** | Frontend development sign in, sign up, user home page, chat room page and relate api; Backend development sign in, sign up, create and join room api; Database set up; Documentation for the project; feature and work Integration 
 | **Danyang Zhang** | Backend development chat room api; Presence Detection ; manual testing; feature integration          |
 | **Renchao Wu**  | Backend development chat room api;           |
     
