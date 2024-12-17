@@ -118,8 +118,8 @@ cargo run
 | Team Member     | Contributions                                                                                   |
 |-----------------|-------------------------------------------------------------------------------------------------|
 | **Zeying Zhou** | Frontend development sign in, sign up, user home page and relate api; Backend development sign in, sign up, create and join room api; Database set up; Documentation for the project  
-| **Danyang Zhang** | Presence Detection ; manual testing; feature integration          |
-| **Renchao Wu**  | Frontend development chat room page; Backend development chat room api;           |
+| **Danyang Zhang** | Backend development chat room api; Presence Detection ; manual testing; feature integration          |
+| **Renchao Wu**  | Backend development chat room api;           |
     
 ## Lessons learned and concluding remarks:
 This project successfully implemented an efficient real-time chat application using Rust and Actix Web, achieving WebSocket-based communication, user status management, and chatroom message broadcasting functionalities. Throughout the development process, we not only deepened our understanding of system-level programming in Rust but also honed our skills in asynchronous programming, database management, and high-concurrency system design.
