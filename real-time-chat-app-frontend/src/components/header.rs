@@ -17,13 +17,15 @@ pub fn header_component() -> Html {
     let handle_signout = {
         let store_dispatch = dispatch.clone();
         let cloned_navigator = navigator.clone();
+        let cloned_user = user.clone();
 
         Callback::from(move |_: MouseEvent| {
             let dispatch = store_dispatch.clone();
             let navigator = cloned_navigator.clone();
+            let user_id = cloned_user.as_ref().map(|u| u.id).unwrap_or_default();
             spawn_local(async move {
                 set_page_loading(true, dispatch.clone());
-                let res = api_signout_user().await;
+                let res = api_signout_user(user_id).await;
                 match res {
                     Ok(_) => {
                         set_page_loading(false, dispatch.clone());

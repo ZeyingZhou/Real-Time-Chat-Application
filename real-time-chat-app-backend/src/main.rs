@@ -1,6 +1,6 @@
 mod presence;
 mod websocket;
-use crate::presence::PresenceActor;
+use crate::presence::{PresenceActor, UserLogout};
 use actix::prelude::*;
 use actix_cors::Cors;
 use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder};
@@ -19,6 +19,7 @@ use websocket::ChatServer;
 // Define shared app state
 struct AppState {
     db_pool: Pool<SqliteConnectionManager>,
+    pub presence_actor: Addr<PresenceActor>,
 }
 
 #[allow(non_snake_case)]
@@ -188,13 +189,39 @@ async fn signin_user(
     match user {
         Ok((id, username, hashed_password)) => {
             if verify(&payload.password, &hashed_password).unwrap_or(false) {
-                HttpResponse::Ok().json(SigninResponse { user_id: id })
+                // Update user status to 'online' in the database
+                let update_result = conn.execute(
+                    "UPDATE users SET status = 'online' WHERE id = ?",
+                    params![id],
+                );
+
+                match update_result {
+                    Ok(_) => {
+                        // If the update succeeds, return a success response
+                        HttpResponse::Ok().json(SigninResponse { user_id: id })
+                    }
+                    Err(_) => {
+                        // Handle failure to update the status
+                        HttpResponse::InternalServerError().body("Failed to update user status")
+                    }
+                }
             } else {
+                // Invalid credentials
                 HttpResponse::Unauthorized().body("Invalid credentials")
             }
         }
         Err(_) => HttpResponse::Unauthorized().body("Invalid credentials"),
     }
+}
+
+async fn signout_user(state: web::Data<AppState>, path: web::Path<i32>) -> impl Responder {
+    let user_id = path.into_inner();
+
+    // Send the UserLogout message to PresenceActor
+    state.presence_actor.do_send(UserLogout { user_id });
+
+    // Return response immediately
+    HttpResponse::Ok().body(format!("User {} signed out successfully", user_id))
 }
 
 // Handler: Get user info
@@ -381,6 +408,7 @@ async fn main() -> std::io::Result<()> {
             )
             .app_data(web::Data::new(AppState {
                 db_pool: pool.clone(),
+                presence_actor: presence_actor.clone(),
             }))
             .app_data(web::Data::new(server.clone()))
             .app_data(web::Data::new(presence_actor.clone()))
@@ -391,6 +419,7 @@ async fn main() -> std::io::Result<()> {
             .route("/api/chat_rooms/join", web::post().to(join_chat_room))
             .route("/api/chat_rooms/{id}", web::delete().to(delete_chat_room))
             .route("/api/chat_rooms", web::get().to(get_all_chat_rooms))
+            .route("/api/auth/signout/{user_id}", web::post().to(signout_user))
             .route(
                 "/ws/{room_id}/{user_id}",
                 web::get().to(

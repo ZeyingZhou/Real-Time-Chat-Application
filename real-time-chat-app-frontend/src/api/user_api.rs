@@ -1,4 +1,7 @@
-use super::types::{ErrorResponse, User, UserData, ApiResponse, SigninResponse, UserResponse, UserWithRooms, ChatRoom, CreateRoomRequest,JoinRoomRequest};
+use super::types::{
+    ApiResponse, ChatRoom, CreateRoomRequest, ErrorResponse, JoinRoomRequest, SigninResponse, User,
+    UserData, UserResponse, UserWithRooms,
+};
 use reqwasm::http;
 use serde_json::json;
 pub async fn api_signup_user(user_data: &str) -> Result<User, String> {
@@ -64,7 +67,6 @@ pub async fn api_signin_user(user_data: &str) -> Result<SigninResponse, String> 
     }
 }
 
-
 pub async fn api_user_info() -> Result<User, String> {
     let response = match http::Request::get("http://localhost:8000/api/users/me")
         .credentials(http::RequestCredentials::Include)
@@ -91,8 +93,10 @@ pub async fn api_user_info() -> Result<User, String> {
     }
 }
 
-pub async fn api_signout_user() -> Result<(), String> {
-    let response = match http::Request::get("http://localhost:8000/api/auth/signout")
+pub async fn api_signout_user(user_id: i32) -> Result<(), String> {
+    let url = format!("http://localhost:8000/api/auth/signout/{}", user_id); // Interpolate user_id
+
+    let response = match http::Request::post(&url)
         .credentials(http::RequestCredentials::Include)
         .send()
         .await
@@ -101,6 +105,7 @@ pub async fn api_signout_user() -> Result<(), String> {
         Err(_) => return Err("Failed to make request".to_string()),
     };
 
+    // Handle non-200 responses
     if response.status() != 200 {
         let error_response = response.json::<ErrorResponse>().await;
         if let Ok(error_response) = error_response {
@@ -116,11 +121,11 @@ pub async fn api_signout_user() -> Result<(), String> {
 // API Calls
 pub async fn fetch_user_info(user_id: i32) -> Result<UserWithRooms, String> {
     let url = format!("http://localhost:8000/api/users/{}", user_id);
-    match http::Request::get(&url)
-        .send()
-        .await
-    {
-        Ok(response) if response.ok() => response.json::<UserWithRooms>().await.map_err(|e| e.to_string()),
+    match http::Request::get(&url).send().await {
+        Ok(response) if response.ok() => response
+            .json::<UserWithRooms>()
+            .await
+            .map_err(|e| e.to_string()),
         Ok(response) => Err(format!("Error: {}", response.status())),
         Err(err) => Err(format!("Request failed: {}", err)),
     }
