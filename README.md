@@ -116,6 +116,9 @@ cargo run
 ### Testing
 
 To start a new app, we can clear the chatapp.db.
+```
+cd .\real-time-chat-app-backend\   
+```
 
 1. user sign up
 ```
