@@ -1,15 +1,14 @@
-use yew::prelude::*;
-use yew_router::prelude::*;
-use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::spawn_local;
-use web_sys::{WebSocket, HtmlInputElement, MessageEvent};
-use crate::api::user_api::{fetch_user_info, create_chat_room,join_chat_room};
-use crate::api::types::{UserWithRooms, ChatRoom, ChatRoomProps};
+use crate::api::types::{ChatRoom, ChatRoomProps, UserWithRooms};
+use crate::api::user_api::{create_chat_room, fetch_user_info, join_chat_room};
+use crate::router::Route;
+use gloo::timers::callback::Interval;
 use js_sys::JsString;
 use wasm_bindgen::closure::Closure;
-use crate::router::Route;
-
-
+use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::spawn_local;
+use web_sys::{HtmlInputElement, MessageEvent, WebSocket};
+use yew::prelude::*;
+use yew_router::prelude::*;
 
 #[function_component(ChatRoomPage)]
 pub fn chat_room_page(ChatRoomProps { room_id, user_id }: &ChatRoomProps) -> Html {
@@ -18,12 +17,13 @@ pub fn chat_room_page(ChatRoomProps { room_id, user_id }: &ChatRoomProps) -> Htm
     let navigator = use_navigator().unwrap();
     let input_message = use_state(|| String::new());
     let user_info = use_state(|| None::<UserWithRooms>);
+    let user_status = use_state(|| String::from("Loading...")); // Add status state
     let room_id = *room_id;
     let user_id = *user_id;
 
     // Connect WebSocket on mount
-     // Fetch user information when component mounts
-     {
+    // Fetch user information when component mounts
+    {
         let user_info = user_info.clone();
         use_effect_with(user_id, move |&user_id| {
             spawn_local(async move {
@@ -31,17 +31,37 @@ pub fn chat_room_page(ChatRoomProps { room_id, user_id }: &ChatRoomProps) -> Htm
                     Ok(data) => {
                         web_sys::console::log_1(&"Successfully fetched user info".into());
                         user_info.set(Some(data));
-                    },
-                    Err(err) => web_sys::console::log_1(&format!("Failed to fetch user info: {}", err).into()),
+                    }
+                    Err(err) => web_sys::console::log_1(
+                        &format!("Failed to fetch user info: {}", err).into(),
+                    ),
                 }
             });
             || ()
         });
     }
+
+    {
+        let user_status = user_status.clone();
+        use_effect_with(user_id, move |&user_id| {
+            let interval = Interval::new(1000, move || {
+                // Poll every 1 seconds
+                let user_status = user_status.clone();
+                spawn_local(async move {
+                    if let Ok(status_response) = fetch_user_info(user_id).await {
+                        user_status.set(status_response.user.status.clone());
+                    }
+                });
+            });
+
+            || drop(interval) // Cleanup interval on component unmount
+        });
+    }
+
     {
         let ws = ws.clone();
-        let messages = messages.clone(); 
-        use_effect_with((room_id, user_id), move |_| {
+        let messages = messages.clone();
+        use_effect_with((room_id, user_id), move |&(room_id, user_id)| {
             let url = format!("ws://127.0.0.1:8000/ws/{}/{}", room_id, user_id);
             let websocket = WebSocket::new(&url).unwrap();
 
@@ -88,12 +108,15 @@ pub fn chat_room_page(ChatRoomProps { room_id, user_id }: &ChatRoomProps) -> Htm
         })
     };
 
-       let username = user_info.as_ref().and_then(|info| Some(info.user.username.clone()));
+    let username = user_info
+        .as_ref()
+        .and_then(|info| Some(info.user.username.clone()));
     html! {
         <div class="p-6 bg-gray-100 min-h-screen">
             <h1 class="text-2xl font-bold mb-4">{ format!("Chat Room: {}", room_id) }</h1>
             <h2 class="text-xl mb-4">
                 { username.map_or_else(|| "Loading user...".to_string(), |name| format!("User: {}", name)) }
+                <span class="text-sm text-gray-500">{ format!("({})", *user_status) }</span>
             </h2>
             <div class="border p-4 mb-4 h-64 overflow-y-scroll">
                 { for messages.iter().map(|msg| html! { <div>{ msg }</div> }) }

@@ -2,8 +2,11 @@ use super::types::{
     ApiResponse, ChatRoom, CreateRoomRequest, ErrorResponse, JoinRoomRequest, SigninResponse, User,
     UserData, UserResponse, UserWithRooms,
 };
+use anyhow::Result;
 use reqwasm::http;
+use serde::Deserialize;
 use serde_json::json;
+
 pub async fn api_signup_user(user_data: &str) -> Result<User, String> {
     let response = match http::Request::post("http://localhost:8000/api/auth/signup")
         .header("Content-Type", "application/json")
@@ -95,7 +98,6 @@ pub async fn api_user_info() -> Result<User, String> {
 
 pub async fn api_signout_user(user_id: i32) -> Result<(), String> {
     let url = format!("http://localhost:8000/api/auth/signout/{}", user_id); // Interpolate user_id
-
     let response = match http::Request::post(&url)
         .credentials(http::RequestCredentials::Include)
         .send()
@@ -132,8 +134,11 @@ pub async fn fetch_user_info(user_id: i32) -> Result<UserWithRooms, String> {
 }
 
 pub async fn create_chat_room(room_name: String, user_id: i32) -> Result<ChatRoom, String> {
-    let payload = serde_json::to_string(&CreateRoomRequest { name: room_name, user_id })
-        .map_err(|e| format!("Failed to serialize request: {}", e))?;
+    let payload = serde_json::to_string(&CreateRoomRequest {
+        name: room_name,
+        user_id,
+    })
+    .map_err(|e| format!("Failed to serialize request: {}", e))?;
 
     match http::Request::post("http://localhost:8000/api/chat_rooms")
         .header("Content-Type", "application/json")
@@ -141,7 +146,8 @@ pub async fn create_chat_room(room_name: String, user_id: i32) -> Result<ChatRoo
         .send()
         .await
     {
-        Ok(response) if response.ok() => response.json::<ApiResponse<ChatRoom>>()
+        Ok(response) if response.ok() => response
+            .json::<ApiResponse<ChatRoom>>()
             .await
             .map(|data| data.data)
             .map_err(|e| format!("Failed to parse created chat room: {}", e)),
@@ -155,10 +161,11 @@ pub async fn fetch_chat_rooms() -> Result<Vec<ChatRoom>, String> {
         .send()
         .await
     {
-        Ok(response) if response.ok() => {
-            response.json::<ApiResponse<Vec<ChatRoom>>>().await.map(|data| data.data)
-                .map_err(|e| format!("Failed to parse chat rooms: {}", e))
-        }
+        Ok(response) if response.ok() => response
+            .json::<ApiResponse<Vec<ChatRoom>>>()
+            .await
+            .map(|data| data.data)
+            .map_err(|e| format!("Failed to parse chat rooms: {}", e)),
         Ok(response) => Err(format!("Error: {}", response.status())),
         Err(err) => Err(format!("Request failed: {}", err)),
     }
@@ -166,7 +173,8 @@ pub async fn fetch_chat_rooms() -> Result<Vec<ChatRoom>, String> {
 pub async fn fetch_user_with_rooms(user_id: i32) -> Result<UserWithRooms, String> {
     let url = format!("http://localhost:8000/api/users/{}", user_id);
     match http::Request::get(&url).send().await {
-        Ok(response) if response.ok() => response.json::<ApiResponse<UserWithRooms>>()
+        Ok(response) if response.ok() => response
+            .json::<ApiResponse<UserWithRooms>>()
             .await
             .map(|data| data.data)
             .map_err(|e| format!("Failed to parse user data: {}", e)),
@@ -195,10 +203,11 @@ pub async fn join_chat_room(user_id: i32, room_id: i32) -> Result<(), String> {
 pub async fn fetch_joined_rooms(user_id: i32) -> Result<Vec<ChatRoom>, String> {
     let url = format!("http://localhost:8000/api/users/{}/rooms", user_id);
     match http::Request::get(&url).send().await {
-        Ok(response) if response.ok() => {
-            response.json::<ApiResponse<Vec<ChatRoom>>>().await.map(|data| data.data)
-                .map_err(|e| format!("Failed to parse joined rooms: {}", e))
-        }
+        Ok(response) if response.ok() => response
+            .json::<ApiResponse<Vec<ChatRoom>>>()
+            .await
+            .map(|data| data.data)
+            .map_err(|e| format!("Failed to parse joined rooms: {}", e)),
         Ok(response) => Err(format!("Error: {}", response.status())),
         Err(err) => Err(format!("Request failed: {}", err)),
     }
