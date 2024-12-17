@@ -197,7 +197,7 @@ After that go to ```http://localhost.:8080/``` access the application
 | Team Member     | Contributions                                                                                   |
 |-----------------|-------------------------------------------------------------------------------------------------|
 | **Zeying Zhou** | Frontend development sign in, sign up, user home page, chat room page and relate api; Backend development sign in, sign up, create and join room api; Database set up; Documentation for the project; feature and work Integration 
-| **Danyang Zhang** | Backend development chat room api; Presence Detection ; manual testing; feature integration          |
+| **Danyang Zhang** | User sign out feature; Backend development chat room api; Presence Detection ; manual testing; feature integration; video demo          |
 | **Renchao Wu**  | Backend development chat room api;           |
     
 ## Lessons learned and concluding remarks:
