@@ -279,10 +279,15 @@ async fn create_chat_room(
         "INSERT INTO user_chat_room_membership (user_id, room_id) VALUES (?, ?)",
         params![payload.user_id, room_id],
     ) {
-        Ok(_) => HttpResponse::Ok().json(ChatRoom {
-            id: room_id,
-            name: payload.name.clone(),
-        }),
+        Ok(_) => HttpResponse::Ok().json(
+            ApiResponse{
+                status: "success".to_string(),
+                data: ChatRoom {
+                    name: payload.name.clone(),
+                    id: room_id,
+                }
+            }
+    ),
         Err(_) => HttpResponse::InternalServerError().body("Failed to add user to the chat room"),
     }
 }
@@ -316,6 +321,29 @@ async fn delete_chat_room(state: web::Data<AppState>, path: web::Path<i32>) -> i
         Ok(_) => HttpResponse::Ok().body("Chat room deleted successfully"),
         Err(_) => HttpResponse::InternalServerError().body("Failed to delete chat room"),
     }
+}
+
+async fn get_all_chat_rooms(state: web::Data<AppState>) -> impl Responder {
+    let pool = &state.db_pool;
+    let conn = pool.get().expect("Failed to get DB connection");
+
+
+    let mut stmt = conn
+        .prepare("SELECT id, name FROM chat_rooms")
+        .expect("Failed to prepare statement");
+
+    let chat_rooms = stmt
+        .query_map([], |row| {
+            Ok(ChatRoom {
+                id: row.get(0)?,
+                name: row.get(1)?,
+            })
+        })
+        .unwrap()
+        .filter_map(Result::ok)
+        .collect::<Vec<ChatRoom>>();
+
+    HttpResponse::Ok().json(chat_rooms)
 }
 
 fn initialize_database(db_path: &str, schema_path: &str) {
@@ -362,6 +390,7 @@ async fn main() -> std::io::Result<()> {
             .route("/api/chat_rooms", web::post().to(create_chat_room))
             .route("/api/chat_rooms/join", web::post().to(join_chat_room))
             .route("/api/chat_rooms/{id}", web::delete().to(delete_chat_room))
+            .route("/api/chat_rooms", web::get().to(get_all_chat_rooms))
             .route(
                 "/ws/{room_id}/{user_id}",
                 web::get().to(
@@ -369,7 +398,7 @@ async fn main() -> std::io::Result<()> {
                           stream: web::Payload,
                           path: web::Path<(i32, i32)>,
                           srv: web::Data<Addr<ChatServer>>,
-                          presence: web::Data<Addr<PresenceActor>>| {
+                          presence: web::Data<Addr<PresenceActor>> | {
                         chat_route(req, stream, path, srv, presence)
                     },
                 ),

@@ -1,29 +1,29 @@
 use yew::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use yew_router::prelude::*;
-use crate::api::user_api::{fetch_user_info, create_chat_room,join_chat_room};
-use crate::api::types::{UserWithRooms, ChatRoom, CreateRoomRequest};
+use crate::api::user_api::{fetch_user_info, create_chat_room, join_chat_room};
+use crate::api::types::{UserWithRooms};
 use crate::router::Route;
 
+#[derive(Properties, PartialEq)]
+pub struct UserHomePageProps {
+    pub user_id: i32,
+}
+
 #[function_component(UserHomePage)]
-pub fn user_home_page() -> Html {
+pub fn user_home_page(props: &UserHomePageProps) -> Html {
     let new_room_name = use_state(|| String::new());
     let access_code = use_state(|| String::new());
     let user_info = use_state(|| None::<UserWithRooms>);
     let navigator = use_navigator().unwrap();
-    
-    // Retrieve `user_id` from local storage
-    let user_id = {
-        let window = web_sys::window().unwrap();
-        let storage = window.local_storage().unwrap().unwrap();
-        storage.get_item("user_id").unwrap().and_then(|id| id.parse::<i32>().ok())
-    };
+    let user_id = props.user_id; // Use the passed user_id prop directly
 
     // Fetch user info when component mounts
     {
         let user_info = user_info.clone();
-        use_effect_with(user_id, move |user_id| {
-            if let Some(user_id) = *user_id {
+        use_effect_with( user_id,
+            move |_| {
+                let user_info = user_info.clone();
                 spawn_local(async move {
                     match fetch_user_info(user_id).await {
                         Ok(data) => {
@@ -33,13 +33,11 @@ pub fn user_home_page() -> Html {
                         Err(err) => web_sys::console::log_1(&format!("Failed to fetch user info: {}", err).into()),
                     }
                 });
-            } else {
-                web_sys::console::log_1(&"User ID not found in localStorage".into());
+                || ()
             }
-            || ()
-        });
+            // Dependency: only triggers if user_id changes
+        );
     }
-
 
     // Update the input value for new room name
     let on_new_room_input = {
@@ -63,69 +61,45 @@ pub fn user_home_page() -> Html {
 
     // Add a new room
     let add_room = {
-        let user_info = user_info.clone();
         let new_room_name = new_room_name.clone();
         let navigator = navigator.clone();
-        let user_id = {
-            let window = web_sys::window().unwrap();
-            let storage = window.local_storage().unwrap().unwrap();
-            storage.get_item("user_id").unwrap().and_then(|id| id.parse::<i32>().ok())
-        };
-    
+
         Callback::from(move |_| {
             if !new_room_name.is_empty() {
-                if let Some(user_id) = user_id {
-                    let room_name = (*new_room_name).clone();
-                    let user_info = user_info.clone();
-                    spawn_local(async move {
-                        match create_chat_room(room_name.clone(), user_id).await {
-                            Ok(new_room) => {
-                                // Navigate to the chat room page with the room ID
-                                // navigator.push(&Route::ChatRoom { room_id: new_room.id， user_id });
-                            }
-                            Err(err) => web_sys::console::log_1(&format!("Failed to create chat room: {}", err).into()),
+                let room_name = (*new_room_name).clone();
+                let navigator = navigator.clone();
+                spawn_local(async move {
+                    match create_chat_room(room_name.clone(), user_id).await {
+                        Ok(new_room) => {
+                            web_sys::console::log_1(&"Successfully created chat room".into());
+                            navigator.push(&Route::ChatRoomPage { room_id: new_room.id, user_id });
                         }
-                    });
-                    new_room_name.set(String::new()); // Clear the input after adding
-                } else {
-                    web_sys::console::log_1(&"User ID not found in localStorage".into());
-                }
+                        Err(err) => web_sys::console::log_1(&format!("Failed to create room: {}", err).into()),
+                    }
+                });
             }
         })
     };
-    
-    // Placeholder for joining a room (not yet implemented)
+
+    // Join a room
     let join_room = {
         let access_code = access_code.clone();
         let navigator = navigator.clone();
-
-        let user_id = {
-            let window = web_sys::window().unwrap();
-            let storage = window.local_storage().unwrap().unwrap();
-            storage.get_item("user_id").unwrap().and_then(|id| id.parse::<i32>().ok())
-        };
 
         Callback::from(move |_| {
             if !access_code.is_empty() {
                 let room_id: Option<i32> = (*access_code).parse().ok();
                 if let Some(room_id) = room_id {
-                    if let Some(user_id) = user_id {
-                        spawn_local(async move {
-                            match join_chat_room(user_id, room_id).await {
-                                Ok(_) => {
-                                    web_sys::console::log_1(&"Successfully joined the room".into());
-                                    // navigator.push(&Route::ChatRoom { room_id, user_id });
-                                }
-                                Err(err) => {
-                                    web_sys::console::log_1(&format!("Failed to join the room: {}", err).into());
-                                }
+                    let navigator = navigator.clone();
+                    spawn_local(async move {
+                        match join_chat_room(user_id, room_id).await {
+                            Ok(_) => {
+                                web_sys::console::log_1(&"Successfully joined room".into());
+                                navigator.push(&Route::ChatRoomPage { room_id, user_id });
                             }
-                        });
-                    } else {
-                        web_sys::console::log_1(&"User ID not found in localStorage".into());
-                    }
-                } else {
-                    web_sys::console::log_1(&"Invalid room ID".into());
+                            Err(err) => web_sys::console::log_1(&format!("Failed to join room: {}", err).into()),
+                        }
+                    });
                 }
             }
         })

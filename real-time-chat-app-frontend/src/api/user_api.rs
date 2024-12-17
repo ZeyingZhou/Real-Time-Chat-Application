@@ -127,32 +127,73 @@ pub async fn fetch_user_info(user_id: i32) -> Result<UserWithRooms, String> {
 }
 
 pub async fn create_chat_room(room_name: String, user_id: i32) -> Result<ChatRoom, String> {
+    let payload = serde_json::to_string(&CreateRoomRequest { name: room_name, user_id })
+        .map_err(|e| format!("Failed to serialize request: {}", e))?;
+
     match http::Request::post("http://localhost:8000/api/chat_rooms")
         .header("Content-Type", "application/json")
-        .body(serde_json::to_string(&CreateRoomRequest { name: room_name, user_id }).unwrap())
+        .body(payload)
         .send()
         .await
     {
-        Ok(response) if response.ok() => response.json::<ChatRoom>().await.map_err(|e| e.to_string()),
+        Ok(response) if response.ok() => response.json::<ApiResponse<ChatRoom>>()
+            .await
+            .map(|data| data.data)
+            .map_err(|e| format!("Failed to parse created chat room: {}", e)),
         Ok(response) => Err(format!("Error: {}", response.status())),
         Err(err) => Err(format!("Request failed: {}", err)),
     }
 }
 
+pub async fn fetch_chat_rooms() -> Result<Vec<ChatRoom>, String> {
+    match http::Request::get("http://localhost:8000/api/chat_rooms")
+        .send()
+        .await
+    {
+        Ok(response) if response.ok() => {
+            response.json::<ApiResponse<Vec<ChatRoom>>>().await.map(|data| data.data)
+                .map_err(|e| format!("Failed to parse chat rooms: {}", e))
+        }
+        Ok(response) => Err(format!("Error: {}", response.status())),
+        Err(err) => Err(format!("Request failed: {}", err)),
+    }
+}
+pub async fn fetch_user_with_rooms(user_id: i32) -> Result<UserWithRooms, String> {
+    let url = format!("http://localhost:8000/api/users/{}", user_id);
+    match http::Request::get(&url).send().await {
+        Ok(response) if response.ok() => response.json::<ApiResponse<UserWithRooms>>()
+            .await
+            .map(|data| data.data)
+            .map_err(|e| format!("Failed to parse user data: {}", e)),
+        Ok(response) => Err(format!("Error: {}", response.status())),
+        Err(err) => Err(format!("Request failed: {}", err)),
+    }
+}
 
 pub async fn join_chat_room(user_id: i32, room_id: i32) -> Result<(), String> {
-    let payload = json!({
-        "user_id": user_id,
-        "room_id": room_id
-    });
+    let payload = serde_json::to_string(&JoinRoomRequest { user_id, room_id })
+        .map_err(|e| format!("Failed to serialize request: {}", e))?;
 
     match http::Request::post("http://localhost:8000/api/chat_rooms/join")
         .header("Content-Type", "application/json")
-        .body(serde_json::to_string(&JoinRoomRequest{ user_id, room_id }).unwrap())
+        .body(payload)
         .send()
         .await
     {
         Ok(response) if response.ok() => Ok(()),
+        Ok(response) => Err(format!("Error: {}", response.status())),
+        Err(err) => Err(format!("Request failed: {}", err)),
+    }
+}
+
+// Fetch joined chat rooms for a user
+pub async fn fetch_joined_rooms(user_id: i32) -> Result<Vec<ChatRoom>, String> {
+    let url = format!("http://localhost:8000/api/users/{}/rooms", user_id);
+    match http::Request::get(&url).send().await {
+        Ok(response) if response.ok() => {
+            response.json::<ApiResponse<Vec<ChatRoom>>>().await.map(|data| data.data)
+                .map_err(|e| format!("Failed to parse joined rooms: {}", e))
+        }
         Ok(response) => Err(format!("Error: {}", response.status())),
         Err(err) => Err(format!("Request failed: {}", err)),
     }

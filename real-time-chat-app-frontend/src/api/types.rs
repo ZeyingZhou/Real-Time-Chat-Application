@@ -1,4 +1,5 @@
 use chrono::prelude::*;
+use yew::Properties;
 use serde::{Deserialize, Serialize};
 
 /// User Model
@@ -105,6 +106,12 @@ pub struct SendMessageRequest {
 pub struct JoinChatRoomRequest {
     pub room_id: String,
     pub user_id: String,
+}
+
+#[derive(Properties, PartialEq)]
+pub struct ChatRoomProps {
+    pub room_id: i32,
+    pub user_id: i32,
 }
 
 /// Error Response

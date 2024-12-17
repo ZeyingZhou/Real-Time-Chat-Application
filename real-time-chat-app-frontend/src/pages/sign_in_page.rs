@@ -129,7 +129,8 @@ pub fn sign_in_page() -> Html {
                         let res = api_signin_user(&form_json).await;
                         match res {
                             Ok(signin_response) => {
-                                // Store the user ID in localStorage
+         
+                                let user_id = signin_response.user_id;
                                 web_sys::window()
                                     .unwrap()
                                     .local_storage()
@@ -139,7 +140,7 @@ pub fn sign_in_page() -> Html {
                                     .expect("Failed to store user ID in localStorage");
     
                                 set_page_loading(false, dispatch);
-                                navigator.push(&router::Route::UserHomePage);
+                                navigator.push(&router::Route::UserHomePage { user_id });
                             }
                             Err(e) => {
                                 set_page_loading(false, dispatch.clone());
