@@ -7,6 +7,12 @@ Name: Renchao Wu Student#: 1009750672 renchao.wu@mail.utoronto.ca
 
 ## Video Demo
 
+
+https://github.com/user-attachments/assets/c256feaa-fe74-4233-9d37-7cfaecd0186b
+
+
+
+
 ## Motivation
 
 Real-time chat applications have evolved into essential tools for modern communication, underpinning interactions in social, professional, and support environments worldwide. Starting from basic messaging systems, the field has witnessed the rise of sophisticated platforms like IRC (Internet Relay Chat) and the progression to highly interactive, feature-rich applications such as Slack, Discord, and Microsoft Teams. These advancements have redefined how people collaborate and communicate in real time, with applications that deliver not only messages but also a sense of connection, immediacy, and productivity.
