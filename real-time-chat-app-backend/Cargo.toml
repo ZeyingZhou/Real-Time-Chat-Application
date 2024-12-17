@@ -1,0 +1,19 @@
+[package]
+name = "real-time-chat-app-backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+actix-cors = "0.7"
+env_logger = "0.11"
+futures-util = { version = "0.3.17", default-features = false, features = ["std"] }
+log = "0.4"
+r2d2 = "0.8"
+r2d2_sqlite = "0.25"
+rusqlite = { version = "0.32.1", features = ["bundled"] }
+bcrypt = "0.16"     # Password hashing
+chrono = { version = "0.4", features = ["serde"] } # Timestamps
+serde = { version = "1", features = ["derive"] }   # Serialization
+actix-web-actors = "4.0"   
+actix = "0.13"               # Actix actor framework

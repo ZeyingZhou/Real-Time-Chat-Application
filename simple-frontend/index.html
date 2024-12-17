@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChatApp UI</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>ChatApp</h1>
+
+
+        <div id="signup-form">
+            <h2>sign up</h2>
+            <form id="form-signup">
+                <input type="text" id="signup-username" placeholder="account" required>
+                <input type="password" id="signup-password" placeholder="password" required>
+                <button type="submit">sign up</button>
+            </form>
+            <p>have an account ? <a href="#" id="show-signin">log in</a></p>
+        </div>
+
+
+        <div id="signin-form" class="hidden">
+            <h2>log in</h2>
+            <form id="form-signin">
+                <input type="text" id="signin-username" placeholder="account" required>
+                <input type="password" id="signin-password" placeholder="password" required>
+                <button type="submit">log in </button>
+            </form>
+            <p>no account? <a href="#" id="show-signup">log out</a></p>
+        </div>
+
+
+        <div id="main-section" class="hidden">
+            <h2>Welcome, <span id="user-name"></span></h2>
+            <button id="logout-button">log out</button>
+
+            <h3>Chat room</h3>
+            <div>
+                <h4>Create Chatroom</h4>
+                <form id="form-create-room">
+                    <input type="text" id="new-room-name" placeholder="chatroom name" required>
+                    <button type="submit">Create</button>
+                </form>
+            </div>
+
+            <div>
+                <h4>Join chatroom</h4>
+                <select id="chat-rooms-list">
+                    <option value="">select</option>
+                </select>
+                <button id="join-room-button">Join</button>
+            </div>
+
+            <div>
+                <h4>Joined Chat Rooms</h4>
+                <ul id="joined-rooms-list"></ul>
+            </div>
+
+
+            <div id="chat-section-container" class="hidden">
+                <h3>Chatroom: <span id="current-room-name"></span></h3>
+                <div id="chat-section"></div>
+                <form id="chat-form">
+                    <input type="text" id="chat-message" placeholder="message" required>
+                    <button type="submit">Send</button>
+                </form>
+                <button id="leave-room-button">Leave</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

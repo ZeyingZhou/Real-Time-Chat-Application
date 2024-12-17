@@ -1,0 +1,38 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+.hidden {
+    display: none;
+}
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+form {
+    margin-bottom: 20px;
+}
+input, button, select {
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+#chat-section {
+    border: 1px solid #ccc;
+    padding: 10px;
+    height: 400px;
+    overflow-y: scroll;
+    margin-bottom: 10px;
+}
+#chat-form input {
+    width: 80%;
+    display: inline-block;
+}
+#chat-form button {
+    width: 18%;
+    display: inline-block;
+}
+button {
+    cursor: pointer;
+}
